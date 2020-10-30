@@ -1,0 +1,14 @@
+{
+  "name": "activate-unity",
+  "description": "activate unity action",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuler90/activate-unity.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,25 @@
+name: Activate Unity
+description: Activate Unity license and return it after job finish
+inputs:
+  unity-path:
+    description: Path to Unity executable. UNITY_PATH env will be used if not provided
+    required: false
+  unity-username:
+    description: Unity activation username. Manual license will be used if not provided
+    required: false
+  unity-password:
+    description: Unity activation password. Manual license will be used if not provided
+    required: false
+  unity-serial:
+    description: Unity activation serial key. Manual license will be used if not provided
+    required: false
+  unity-manual-license:
+    description: Unity manual license content
+    required: false
+runs:
+  using: node12
+  main: src/activate-license.js
+  post: src/return-license.js
+branding:
+  icon: unlock
+  color: gray-dark
