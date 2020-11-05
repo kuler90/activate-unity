@@ -5,16 +5,16 @@ inputs:
     description: Path to Unity executable. UNITY_PATH env will be used if not provided
     required: false
   unity-username:
-    description: Unity activation username. Manual license will be used if not provided
+    description: Unity activation username
     required: false
   unity-password:
-    description: Unity activation password. Manual license will be used if not provided
+    description: Unity activation password
     required: false
   unity-serial:
-    description: Unity activation serial key. Manual license will be used if not provided
+    description: Unity activation serial key
     required: false
   unity-manual-license:
-    description: Unity manual license content
+    description: Unity license content for manual activation
     required: false
 runs:
   using: node12
