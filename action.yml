@@ -13,9 +13,6 @@ inputs:
   unity-serial:
     description: Unity activation serial key
     required: false
-  unity-manual-license:
-    description: Unity license content for manual activation
-    required: false
 runs:
   using: node12
   main: src/activate-license.js

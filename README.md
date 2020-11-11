@@ -22,10 +22,6 @@ Unity activation password.
 
 Unity activation serial key.
 
-### `unity-manual-license`
-
-Unity license content for manual activation.
-
 ## Example usage
 
 ```yaml
