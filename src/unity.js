@@ -1,55 +1,46 @@
 const exec = require('@actions/exec');
 const fs = require('fs');
 
-module.exports = { activateLicense, activateManualLicense, returnLicense }
+module.exports = { createManualActivationFile, activateManualLicense, activateSerialLicense, returnLicense };
 
-async function activateLicense(unityPath, username, password, serial) {
-    await prepareForActivation();
-    const stdout = await execute(`${unityCmd(unityPath)} -batchmode -nographics -quit -logFile -projectPath ? -username "${username}" -password "${password}" -serial "${serial}"`, true);
+async function activateSerialLicense(unityPath, username, password, serial) {
+    // use '-projectPath ?' for skipping project indexing
+    const stdout = await executeUnity(unityPath, `-batchmode -nographics -quit -logFile "-" -projectPath "?" -username "${username}" -password "${password}" -serial "${serial}"`);
     if (!stdout.includes('Next license update check is after')) {
         throw new Error('Activation failed');
     }
 }
 
-async function activateManualLicense(unityPath, manualLicense) {
-    fs.writeFileSync('license.ulf', manualLicense);
-    await prepareForActivation();
-    const stdout = await execute(`${unityCmd(unityPath)} -batchmode -nographics -quit -logFile -projectPath ? -manualLicenseFile license.ulf`);
+async function createManualActivationFile(unityPath) {
+    await executeUnity(unityPath, '-batchmode -nographics -quit -logFile "-" -createManualActivationFile');
+    return fs.readdirSync('./').find(path => path.endsWith('.alf'));
+}
+
+async function activateManualLicense(unityPath, licenseData) {
+    fs.writeFileSync('license.ulf', licenseData);
+    const stdout = await executeUnity(unityPath, `-batchmode -nographics -quit -logFile "-" -manualLicenseFile license.ulf`);
     if (!stdout.includes('Next license update check is after')) {
         throw new Error('Activation failed');
     }
 }
 
 async function returnLicense(unityPath) {
-    await execute(`${unityCmd(unityPath)} -batchmode -nographics -quit -logFile -returnlicense`);
+    await executeUnity(unityPath, '-batchmode -nographics -quit -logFile "-" -returnlicense');
 }
 
-async function prepareForActivation() {
-    if (process.platform === 'darwin') {
-        await execute('sudo mkdir -p "/Library/Application Support/Unity"');
-        await execute(`sudo chown -R ${process.env.USER} "/Library/Application Support/Unity"`);
-    }
-}
-
-function unityCmd(unityPath) {
-    let unityCmd = '';
+async function executeUnity(unityPath, args) {
     if (process.platform === 'linux') {
-        unityCmd = `xvfb-run --auto-servernum "${unityPath}"`;
-    } else if (process.platform === 'darwin') {
-        unityCmd = `"${unityPath}"`;
-    } else if (process.platform === 'win32') {
-        unityCmd = `"${unityPath}"`;
+        return await execute(`xvfb-run --auto-servernum "${unityPath}" ${args}`, true);
+    } else {
+        return await execute(`"${unityPath}" ${args}`, true);
     }
-    return unityCmd;
 }
 
 async function execute(command, ignoreReturnCode) {
     let stdout = '';
     await exec.exec(command, [], {
         ignoreReturnCode: ignoreReturnCode,
-        listeners: {
-            stdout: buffer => stdout += buffer.toString()
-        }
+        listeners: { stdout: buffer => stdout += buffer.toString() }
     });
     return stdout;
 }

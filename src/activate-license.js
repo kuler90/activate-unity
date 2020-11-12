@@ -1,4 +1,6 @@
 const core = require('@actions/core');
+const exec = require('@actions/exec');
+const path = require('path');
 const unity = require('./unity');
 
 async function run() {
@@ -7,17 +9,19 @@ async function run() {
         if (!unityPath) {
             throw new Error('unity path not found');
         }
-        const unityUsername = core.getInput('unity-username');
-        const unityPassword = core.getInput('unity-password');
+        const unityUsername = core.getInput('unity-username', { required: true });
+        const unityPassword = core.getInput('unity-password', { required: true });
+        const unityAuthenticatorKey = core.getInput('unity-authenticator-key');
         const unitySerial = core.getInput('unity-serial');
-        const unityManualLicense = core.getInput('unity-manual-license');
 
-        if (unityUsername && unityPassword && unitySerial) {
-            await unity.activateLicense(unityPath, unityUsername, unityPassword, unitySerial);
-        } else if (unityManualLicense) {
-            await unity.activateManualLicense(unityPath, unityManualLicense);
+        if (unitySerial) {
+            await unity.activateSerialLicense(unityPath, unityUsername, unityPassword, unitySerial);
         } else {
-            throw new Error('Empty (unity-username and unity-password and unity-serial) or unity-manual-license inputs');
+            await exec.exec('npm install puppeteer@"^5.x"', [], { cwd: path.join(__dirname, '..') }); // install puppeteer for current platform
+            const licenseRobot = require('./license-robot');
+            const licenseRequestFile = await unity.createManualActivationFile(unityPath);
+            const licenseData = await licenseRobot.getPersonalLicense(licenseRequestFile, unityUsername, unityPassword, unityAuthenticatorKey);
+            await unity.activateManualLicense(unityPath, licenseData);
         }
     } catch (error) {
         core.setFailed(error.message);

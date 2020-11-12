@@ -7,7 +7,7 @@ async function run() {
         if (!unityPath) {
             throw new Error('unity path not found');
         }
-        unity.returnLicense(unityPath);
+        await unity.returnLicense(unityPath);
     } catch (error) {
         core.setFailed(error.message);
     }
