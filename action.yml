@@ -20,7 +20,6 @@ runs:
   using: node12
   main: src/activate-license.js
   post: src/return-license.js
-  post-if: inputs.unity-serial != ''
 branding:
   icon: unlock
   color: gray-dark

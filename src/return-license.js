@@ -7,7 +7,9 @@ async function run() {
         if (!unityPath) {
             throw new Error('unity path not found');
         }
-        await unity.returnLicense(unityPath);
+        if (core.getInput('unity-serial')) {
+            await unity.returnLicense(unityPath);
+        }
     } catch (error) {
         core.setFailed(error.message);
     }
