@@ -35,7 +35,7 @@ Unity license serial key. Used for Plus/Professional license activation.
 1. Login to Unity account
 2. Go to account settings
 3. Activate Two Factor Authentication through Authenticator App
-4. On page with QR code click "Can't scan the barcode?" and save key
+4. On page with QR code click "Can't scan the barcode?" and save key (remove spaces in it)
 5. Finish activation
 
 ## Example usage
