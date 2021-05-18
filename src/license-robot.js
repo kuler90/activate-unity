@@ -18,6 +18,7 @@ async function browser_getPersonalLicense(licenseRequestData, username, password
     const browser = await puppeteer.launch({ headless: headless });
     try {
         const page = await browser.newPage();
+        await page.setDefaultNavigationTimeout(120 * 1000);
         await page.goto('https://license.unity3d.com/manual');
         await licensePage_login(page, username, password, authenticatorKey);
         try {
@@ -71,7 +72,7 @@ async function licensePage_login(page, username, password, authenticatorKey) {
  */
 async function licensePage_attachFileData(page, licenseRequestData) {
     console.log("License robot. Attach license request file...");
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     await page.setRequestInterception(true);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
@@ -92,7 +93,7 @@ async function licensePage_attachFileData(page, licenseRequestData) {
  */
 async function licensePage_selectType(page) {
     console.log("License robot. Select license type...");
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
             method: "PUT",
@@ -112,7 +113,7 @@ async function licensePage_selectType(page) {
  */
 async function licensePage_downloadLicense(page) {
     console.log("License robot. Download license file...");
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
             method: "POST",
