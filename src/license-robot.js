@@ -14,6 +14,7 @@ async function getPersonalLicense(licenseRequestFile, username, password, authen
 }
 
 async function browser_getPersonalLicense(licenseRequestData, username, password, authenticatorKey) {
+    console.log("License robot. Start");
     const browser = await puppeteer.launch({ headless: BROWSER_HEADLESS });
     try {
         const page = await browser.newPage();
@@ -37,6 +38,7 @@ async function browser_getPersonalLicense(licenseRequestData, username, password
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_login(page, username, password, authenticatorKey) {
+    console.log("License robot. Login...");
     await page.waitForSelector('#conversations_create_session_form_email');
     await page.type('#conversations_create_session_form_email', username);
     await page.type('#conversations_create_session_form_password', password);
@@ -46,6 +48,7 @@ async function licensePage_login(page, username, password, authenticatorKey) {
 
     const verifyCodeInput = await page.$('#conversations_tfa_required_form_verify_code');
     if (verifyCodeInput) {
+        console.log("License robot. Passing two-factor authentication...");
         if (!authenticatorKey) {
             throw new Error('account verification requested but authenticator key is not provided');
         }
@@ -65,6 +68,7 @@ async function licensePage_login(page, username, password, authenticatorKey) {
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_attachFileData(page, licenseRequestData) {
+    console.log("License robot. Attach license file...");
     await page.waitForTimeout(2000);
     await page.setRequestInterception(true);
     page.once("request", interceptedRequest => {
@@ -85,6 +89,7 @@ async function licensePage_attachFileData(page, licenseRequestData) {
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_selectType(page) {
+    console.log("License robot. Select license type");
     await page.waitForTimeout(1000);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
