@@ -5,17 +5,17 @@ const fs = require('fs');
 module.exports = { getPersonalLicense };
 
 let RETRY_COUNT = 2;
-let BROWSER_HEADLESS = true;
 
-async function getPersonalLicense(licenseRequestFile, username, password, authenticatorKey) {
+async function getPersonalLicense(licenseRequestFile, username, password, authenticatorKey, headless = true) {
     const licenseRequestData = fs.readFileSync(licenseRequestFile, 'utf8');
-    const licenseData = await retry(() => browser_getPersonalLicense(licenseRequestData, username, password, authenticatorKey), RETRY_COUNT);
+    console.log("License robot. Start");
+    const licenseData = await retry(() => browser_getPersonalLicense(licenseRequestData, username, password, authenticatorKey, headless), RETRY_COUNT);
+    console.log("License robot. Finish");
     return licenseData;
 }
 
-async function browser_getPersonalLicense(licenseRequestData, username, password, authenticatorKey) {
-    console.log("License robot. Start");
-    const browser = await puppeteer.launch({ headless: BROWSER_HEADLESS });
+async function browser_getPersonalLicense(licenseRequestData, username, password, authenticatorKey, headless) {
+    const browser = await puppeteer.launch({ headless: headless });
     try {
         const page = await browser.newPage();
         await page.goto('https://license.unity3d.com/manual');
@@ -42,9 +42,10 @@ async function licensePage_login(page, username, password, authenticatorKey) {
     await page.waitForSelector('#conversations_create_session_form_email');
     await page.type('#conversations_create_session_form_email', username);
     await page.type('#conversations_create_session_form_password', password);
-    await page.click('input[name=commit]');
-    await page.waitForNavigation();
-    await page.waitForTimeout(1000);
+    await Promise.all([
+        page.click('input[name=commit]'),
+        page.waitForNavigation({ waitUntil: 'networkidle0' })
+    ]);
 
     const verifyCodeInput = await page.$('#conversations_tfa_required_form_verify_code');
     if (verifyCodeInput) {
@@ -58,9 +59,10 @@ async function licensePage_login(page, username, password, authenticatorKey) {
         }
         const otpCode = otplib.authenticator.generate(authenticatorKey.replace(/ /g, ''));
         await verifyCodeInput.type(otpCode);
-        await page.click('input[name="conversations_tfa_required_form[submit_verify_code]"]');
-        await page.waitForNavigation();
-        await page.waitForTimeout(1000);
+        await Promise.all([
+            page.click('input[name="conversations_tfa_required_form[submit_verify_code]"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle0' })
+        ]);
     }
 }
 
@@ -68,8 +70,8 @@ async function licensePage_login(page, username, password, authenticatorKey) {
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_attachFileData(page, licenseRequestData) {
-    console.log("License robot. Attach license file...");
-    await page.waitForTimeout(2000);
+    console.log("License robot. Attach license request file...");
+    await page.waitForTimeout(1000);
     await page.setRequestInterception(true);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
@@ -89,7 +91,7 @@ async function licensePage_attachFileData(page, licenseRequestData) {
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_selectType(page) {
-    console.log("License robot. Select license type");
+    console.log("License robot. Select license type...");
     await page.waitForTimeout(1000);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
@@ -109,6 +111,7 @@ async function licensePage_selectType(page) {
  * @param {import("puppeteer").Page} page
  */
 async function licensePage_downloadLicense(page) {
+    console.log("License robot. Download license file...");
     await page.waitForTimeout(1000);
     page.once("request", interceptedRequest => {
         interceptedRequest.continue({
@@ -132,10 +135,11 @@ async function retry(func, retryCount) {
         try {
             return await func();
         } catch (error) {
-            if (retryCount > 0)
+            if (retryCount > 0) {
                 retryCount--;
-            else
-                throw error;
+                console.error(error);
+            }
+            else throw error;
         }
     }
 }
