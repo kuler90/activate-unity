@@ -40,9 +40,12 @@ async function browser_getPersonalLicense(licenseRequestData, username, password
  */
 async function licensePage_login(page, username, password, authenticatorKey) {
     console.log("License robot. Login...");
-    await page.waitForSelector('#conversations_create_session_form_email');
-    await page.type('#conversations_create_session_form_email', username);
-    await page.type('#conversations_create_session_form_password', password);
+
+    await page.waitForSelector("#conversations_create_session_form_email");
+
+    await page.evaluate((x) => { document.getElementById("conversations_create_session_form_email").value = x; }, username);
+    await page.evaluate((x) => { document.getElementById("conversations_create_session_form_password").value = x; }, password);
+
     await Promise.all([
         page.click('input[name=commit]'),
         page.waitForNavigation({ waitUntil: 'networkidle0' })
