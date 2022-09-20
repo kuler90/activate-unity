@@ -24,7 +24,7 @@ async function activateManualLicense(unityPath, licenseData) {
     }
 }
 
-async function returnLicense(unityPath) {
+async function returnLicense(unityPath, username, password) {
     await executeUnity(unityPath, `-batchmode -nographics -quit -logFile "-" -returnlicense -username "${username}" -password "${password}"`);
 }
 
