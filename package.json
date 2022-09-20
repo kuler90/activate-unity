@@ -3,7 +3,7 @@
   "description": "activate unity action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redemptiongames/activate-unity.git"
+    "url": "git+https://github.com/kuler90/activate-unity.git"
   },
   "license": "MIT",
   "dependencies": {
