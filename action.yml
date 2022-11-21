@@ -17,7 +17,7 @@ inputs:
     description: Unity license serial key. Used for Plus/Professional license activation
     required: false
 runs:
-  using: node12
+  using: node16
   main: src/activate-license.js
   post: src/return-license.js
 branding:
